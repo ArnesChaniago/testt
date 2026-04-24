@@ -61,16 +61,21 @@
         // ⚙️ CONFIGURATION PANEL
         // ============================================================================
         const CONFIG = {
+          demo: {
+            enableDailyLimit: true // Ubah ke false untuk menonaktifkan limit 1x per 24 jam
+          },
           performance: {
-            winRate: 84.5,
-            totalTrades: 1204,
+            winRate: 64.5,
+            totalTrades: 126,
             profitFactor: "2.4",
             lastUpdate: "April 2026",
             activeStrategies: "Mean Reversion & Momentum"
           },
           pricing: {
             sixMonths: "1.300.000",
+            sixMonthsOriginal: "",
             oneYear: "1.500.000",
+            oneYearOriginal: "2.000.000",
             lifetime: "5.700.000",
             lifetimeOriginal: "8.000.000"
           },
@@ -80,16 +85,18 @@
             phone: "+62 819-5321-0380"
           },
           video: {
-            title: "The Paradigm Shift",
-            subtitle: "Watch how we remove emotion from trading.",
-            youtubeLink: "https://youtu.be/glscfhJyZHo?si=G07n16KUiBckSz8k"
+            title: "The Quantitative Paradigm",
+            subtitle: "Inspired by Jim Simons, the Father of Quant. Pure math, zero emotion—generating <strong class='text-white font-bold bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/30'>returns that outperform Warren Buffett</strong>. Welcome to the Jarvis algorithm.",
+            youtubeLink: "https://www.youtube.com/watch?v=gjO_UFeH__A"
           },
           proofOfEdge: [
-            "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=400&h=700",
-            "https://images.unsplash.com/photo-1641580529558-a96ce704e6c1?auto=format&fit=crop&q=80&w=400&h=700",
-            "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=400&h=700",
-            "https://images.unsplash.com/photo-1621504450181-5d356f61d307?auto=format&fit=crop&q=80&w=400&h=700",
-            "https://images.unsplash.com/photo-1641580529558-a96ce704e6c1?auto=format&fit=crop&q=80&w=400&h=700"
+            "images/proof1.jpg",
+            "images/proof2.jpg",
+            "images/proof3.jpg",
+            "images/proof4.jpg",
+            "images/proof5.jpg",
+            "images/proof6.jpg",
+            "images/proof7.jpg"
           ],
           timeline: [
             { title: "Data Ingestion", desc: "We pull raw tick data, order flow anomalies, and macro indicators across 50+ pairs in real-time.", img: "Data Stream" },
@@ -114,7 +121,7 @@
             "6. BATASAN TANGGUNG JAWAB (WARRANTY AND LIABILITY)",
             "Capital Nerds berupaya sebaik mungkin untuk menjaga stabilitas engine Jarvis. Namun, kami tidak menjamin layanan akan selalu bebas dari gangguan teknis, keterlambatan data dari API pihak ketiga, atau kesalahan teknis lainnya. Kami tidak bertanggung jawab atas keputusan investasi yang diambil berdasarkan data yang mengalami kendala teknis tersebut.",
             "7. KEAMANAN DAN PRIVASI (SECURITY & PRIVACY)",
-            "Informasi pribadi Anda aman bersama kami. Capital Nerds mengambil langkah-langkah keamanan yang wajar untuk melindungi data pengguna dari akses tidak sah. Data Anda hanya digunakan untuk kebutuhan pemrosesan pesanan dan peningkatan layanan."
+            "Informasi pribadi Anda aman bersama kami. Capital Nerds mengambil langkah-langkap keamanan yang wajar untuk melindungi data pengguna dari akses tidak sah. Data Anda hanya digunakan untuk kebutuhan pemrosesan pesanan dan peningkatan layanan."
           ]
         };
 
@@ -488,6 +495,10 @@
 
             useEffect(() => {
                 const checkLimit = () => {
+                    if (!CONFIG.demo.enableDailyLimit) {
+                        setHasReachedLimit(false);
+                        return;
+                    }
                     const lastUsage = localStorage.getItem('jarvisDemoLastUsage');
                     if (lastUsage) {
                         const now = new Date().getTime();
@@ -523,10 +534,11 @@
                     const aiResponse = await callGeminiLLM(newsInput);
                     setResult(aiResponse);
                     
-                    // Kunci akses pengguna setelah sukses (Set limit 24 jam)
-                    localStorage.setItem('jarvisDemoLastUsage', new Date().getTime().toString());
-                    setHasReachedLimit(true);
-                    setTimeRemaining("23j 59m");
+                    if (CONFIG.demo.enableDailyLimit) {
+                        localStorage.setItem('jarvisDemoLastUsage', new Date().getTime().toString());
+                        setHasReachedLimit(true);
+                        setTimeRemaining("23j 59m");
+                    }
                 } catch (err) {
                     setError("Jarvis semantic engine failed to connect. Try again later.");
                 } finally {
@@ -947,9 +959,10 @@
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
                       {CONFIG.video.title}
                     </h2>
-                    <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-12">
-                      {CONFIG.video.subtitle}
-                    </p>
+                    <p 
+                      className="text-gray-400 max-w-3xl mx-auto text-lg mb-12 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: CONFIG.video.subtitle }}
+                    ></p>
                   </FadeInSection>
 
                   <FadeInSection delay={200}>
@@ -1235,6 +1248,11 @@
                     <FadeInSection delay={0}>
                       <div className="p-8 rounded-3xl border border-gray-800/80 bg-[#050505]/80 backdrop-blur-sm flex flex-col h-full hover:border-gray-600 hover:-translate-y-1 transition-all duration-300">
                         <h3 className="text-lg font-medium text-gray-400 mb-2">6 Months</h3>
+                        {CONFIG.pricing.sixMonthsOriginal && (
+                          <div className="mb-1">
+                            <span className="text-sm text-gray-500 line-through">Rp {CONFIG.pricing.sixMonthsOriginal}</span>
+                          </div>
+                        )}
                         <div className="mb-6 flex items-baseline">
                           <span className="text-xl font-bold text-white mr-1 opacity-80">Rp</span>
                           <span className="text-4xl font-bold text-white">{CONFIG.pricing.sixMonths}</span>
@@ -1263,9 +1281,11 @@
                           BEST VALUE
                         </div>
                         <h3 className="text-lg font-medium text-white mb-2">1 Year</h3>
-                        <div className="mb-1">
-                          <span className="text-sm text-gray-400 line-through">Rp 2.000.000</span>
-                        </div>
+                        {CONFIG.pricing.oneYearOriginal && (
+                          <div className="mb-1">
+                            <span className="text-sm text-gray-400 line-through">Rp {CONFIG.pricing.oneYearOriginal}</span>
+                          </div>
+                        )}
                         <div className="mb-6 flex items-baseline">
                           <span className="text-xl font-bold text-white mr-1 drop-shadow-md">Rp</span>
                           <span className="text-4xl font-bold text-white drop-shadow-md">{CONFIG.pricing.oneYear}</span>
@@ -1291,9 +1311,11 @@
                     <FadeInSection delay={300}>
                       <div className="p-8 rounded-3xl border border-gray-800/80 bg-[#050505]/80 backdrop-blur-sm flex flex-col h-full hover:border-gray-600 hover:-translate-y-1 transition-all duration-300">
                         <h3 className="text-lg font-medium text-gray-400 mb-2">Lifetime</h3>
-                        <div className="mb-1">
-                          <span className="text-sm text-gray-500 line-through">Rp {CONFIG.pricing.lifetimeOriginal}</span>
-                        </div>
+                        {CONFIG.pricing.lifetimeOriginal && (
+                          <div className="mb-1">
+                            <span className="text-sm text-gray-500 line-through">Rp {CONFIG.pricing.lifetimeOriginal}</span>
+                          </div>
+                        )}
                         <div className="mb-6 flex items-baseline">
                           <span className="text-xl font-bold text-white mr-1 opacity-80">Rp</span>
                           <span className="text-4xl font-bold text-white">{CONFIG.pricing.lifetime}</span>
