@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Nerds | Algorithmic Precision</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel CDN (For JSX Translation) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { margin: 0; padding: 0; background-color: #010101; color: #e5e7eb; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #010101; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ============================================================================
+        // 🛠️ ICON COMPONENTS (Replacing lucide-react for pure HTML compatibility)
+        // ============================================================================
+        const SVGIcon = ({ children, size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+        const ChevronRight = (p) => <SVGIcon {...p}><polyline points="9 18 15 12 9 6" /></SVGIcon>;
+        const BarChart3 = (p) => <SVGIcon {...p}><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></SVGIcon>;
+        const Activity = (p) => <SVGIcon {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></SVGIcon>;
+        const Shield = (p) => <SVGIcon {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></SVGIcon>;
+        const Lock = (p) => <SVGIcon {...p}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></SVGIcon>;
+        const Zap = (p) => <SVGIcon {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></SVGIcon>;
+        const Play = (p) => <SVGIcon {...p}><polygon points="5 3 19 12 5 21 5 3"/></SVGIcon>;
+        const BrainCircuit = (p) => <SVGIcon {...p}><path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58 2.5 2.5 0 0 0 2.96 3.08 2.5 2.5 0 0 0 4.91.05L12 20V4.5Z"/><path d="M16 8V5c0-1.1.9-2 2-2"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M20.5 8a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"/><path d="M16.5 13a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"/><path d="M20.5 21a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"/><path d="M18.5 3a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"/></SVGIcon>;
+        const Network = (p) => <SVGIcon {...p}><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></SVGIcon>;
+        const LineChart = (p) => <SVGIcon {...p}><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></SVGIcon>;
+        const Cpu = (p) => <SVGIcon {...p}><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/></SVGIcon>;
+        const CheckCircle2 = (p) => <SVGIcon {...p}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></SVGIcon>;
+        const AlertTriangle = (p) => <SVGIcon {...p}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></SVGIcon>;
+        const Terminal = (p) => <SVGIcon {...p}><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></SVGIcon>;
+        const Code2 = (p) => <SVGIcon {...p}><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></SVGIcon>;
+        const Database = (p) => <SVGIcon {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></SVGIcon>;
+        const MessageSquare = (p) => <SVGIcon {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></SVGIcon>;
+        const Webhook = (p) => <SVGIcon {...p}><path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/></SVGIcon>;
+        const Server = (p) => <SVGIcon {...p}><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></SVGIcon>;
+
+        // ============================================================================
+        // ⚙️ CONFIGURATION PANEL
+        // ============================================================================
+        const CONFIG = {
+          performance: {
+            winRate: 84.5,
+            totalTrades: 1204,
+            profitFactor: "2.4",
+            lastUpdate: "April 2026",
+            activeStrategies: "Mean Reversion & Momentum"
+          },
+          pricing: {
+            sixMonths: "1.300.000",
+            oneYear: "1.500.000",
+            lifetime: "5.700.000",
+            lifetimeOriginal: "8.000.000"
+          },
+          support: {
+            telegram: "@CapitalNerds_Admin",
+            discord: "CapitalNerds#0000",
+            phone: "+62 819-5321-0380"
+          },
+          video: {
+            title: "The Paradigm Shift",
+            subtitle: "Watch how we remove emotion from trading.",
+            youtubeLink: "https://youtu.be/glscfhJyZHo?si=G07n16KUiBckSz8k"
+          },
+          proofOfEdge: [
+            "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=400&h=700",
+            "https://images.unsplash.com/photo-1641580529558-a96ce704e6c1?auto=format&fit=crop&q=80&w=400&h=700",
+            "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=400&h=700",
+            "https://images.unsplash.com/photo-1621504450181-5d356f61d307?auto=format&fit=crop&q=80&w=400&h=700",
+            "https://images.unsplash.com/photo-1641580529558-a96ce704e6c1?auto=format&fit=crop&q=80&w=400&h=700"
+          ],
+          timeline: [
+            { title: "Data Ingestion", desc: "We pull raw tick data, order flow anomalies, and macro indicators across 50+ pairs in real-time.", img: "Data Stream" },
+            { title: "Algorithmic Filtering", desc: "Our proprietary models filter out market noise. If the setup doesn't meet a strict 80%+ historical probability, it gets discarded.", img: "Noise Filter" },
+            { title: "LLM Validation", desc: "Before execution, an AI semantic layer cross-checks current news sentiment to avoid sudden macro-economic spikes.", img: "AI Check" },
+            { title: "Zero-Latency Execution", desc: "The verified signal is instantly beamed to our private Discord server. You execute exactly when the algorithm dictates.", img: "Execution" }
+          ],
+          termsAndConditions: [
+            "1. KETENTUAN PENGGUNAAN (CONDITIONS OF USE)",
+            "Dengan mengakses dan menggunakan layanan Capital Nerds, Anda secara otomatis menyetujui seluruh syarat dan ketentuan yang berlaku. Jika Anda tidak menyetujui bagian mana pun dari ketentuan ini, Anda diwajibkan untuk menghentikan penggunaan layanan segera.",
+            "2. DESKRIPSI LAYANAN & LISENSI",
+            "Capital Nerds memberikan hak terbatas, non-eksklusif, dan tidak dapat dipindahtangankan kepada Pengguna untuk mengakses platform perangkat lunak analitik berbasis engine Jarvis. Layanan ini murni bersifat algoritmik dan berdasarkan probabilitas historis.",
+            "3. PENAFIAN KEUANGAN (FINANCIAL DISCLAIMER)",
+            "• Bukan Nasihat Keuangan: Capital Nerds tidak bertindak sebagai penasihat keuangan, broker, atau manajer investasi. Layanan ini tidak menjanjikan atau menjamin hasil keuntungan pasti (profit) dalam bentuk apa pun.",
+            "• Risiko Tinggi: Perdagangan aset finansial (kripto, forex, saham, dan komoditas) membawa tingkat risiko yang sangat tinggi. Anda dapat kehilangan sebagian atau seluruh investasi awal Anda. Anda tidak boleh menginvestasikan uang yang Anda tidak sanggup kehilangannya.",
+            "• Tanggung Jawab Pengguna: Anda bertanggung jawab penuh atas eksekusi trading Anda sendiri. Segala bentuk kerugian finansial yang diakibatkan oleh penggunaan layanan ini sepenuhnya merupakan tanggung jawab pengguna.",
+            "• Kinerja Masa Lalu: Kinerja Masa Lalu tidak menjamin hasil di masa depan (past performance is not indicative of future results).",
+            "4. BIAYA DAN PEMBAYARAN (FEES)",
+            "Seluruh biaya langganan diproses dalam mata uang Rupiah (IDR) melalui gerbang pembayaran resmi Midtrans. Harga layanan dapat berubah sewaktu-waktu dengan pemberitahuan melalui website.",
+            "5. KEBIJAKAN PEMBATALAN DAN PENGEMBALIAN DANA (REFUND POLICY)",
+            "Karena layanan Capital Nerds merupakan Produk Digital Langsung Pakai (akses informasi diberikan seketika setelah pembayaran), maka: TIDAK ADA PENGEMBALIAN DANA (NO REFUND) setelah transaksi berhasil dikonfirmasi. Pengguna berhak membatalkan perpanjangan langganan kapan saja, namun akses akan tetap berlaku hingga masa periode aktif berakhir.",
+            "6. BATASAN TANGGUNG JAWAB (WARRANTY AND LIABILITY)",
+            "Capital Nerds berupaya sebaik mungkin untuk menjaga stabilitas engine Jarvis. Namun, kami tidak menjamin layanan akan selalu bebas dari gangguan teknis, keterlambatan data dari API pihak ketiga, atau kesalahan teknis lainnya. Kami tidak bertanggung jawab atas keputusan investasi yang diambil berdasarkan data yang mengalami kendala teknis tersebut.",
+            "7. KEAMANAN DAN PRIVASI (SECURITY & PRIVACY)",
+            "Informasi pribadi Anda aman bersama kami. Capital Nerds mengambil langkah-langkah keamanan yang wajar untuk melindungi data pengguna dari akses tidak sah. Data Anda hanya digunakan untuk kebutuhan pemrosesan pesanan dan peningkatan layanan."
+          ]
+        };
+
+        // ============================================================================
+        // 🧠 GEMINI API INTEGRATION
+        // ============================================================================
+        const callGeminiLLM = async (newsText) => {
+            const apiKey = ""; // API key is injected by the environment
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: `Analyze the following financial news headline and determine its immediate short-term market impact. Headline: "${newsText}"` }] }],
+                systemInstruction: { 
+                    parts: [{ text: "You are Jarvis, the quantitative trading AI of Capital Nerds. Act as an emotionless, data-driven financial engine. Analyze the provided news headline. Classify the market sentiment as exactly 'BULLISH', 'BEARISH', or 'NEUTRAL'. Provide a confidence score between 0 and 100. Provide a brief 1-2 sentence logical reasoning for your sentiment. Your output must strictly follow the JSON schema." }] 
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            sentiment: { type: "STRING", enum: ["BULLISH", "BEARISH", "NEUTRAL"] },
+                            confidence: { type: "NUMBER" },
+                            reasoning: { type: "STRING" }
+                        },
+                        required: ["sentiment", "confidence", "reasoning"]
+                    }
+                }
+            };
+
+            let delay = 1000;
+            const maxRetries = 5;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (textResult) {
+                        return JSON.parse(textResult);
+                    }
+                    throw new Error("Invalid response format");
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        console.error("Gemini API Error after retries:", error);
+                        throw error;
+                    }
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+            }
+        };
+
+        // 1. Fade Up Component
+        const FadeInSection = ({ children, delay = 0, className = "" }) => {
+          const [isVisible, setVisible] = useState(false);
+          const domRef = useRef();
+
+          useEffect(() => {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting) {
+                    setVisible(true);
+                    observer.unobserve(entry.target);
+                  }
+                });
+              },
+              { threshold: 0.15 }
+            );
+            if (domRef.current) observer.observe(domRef.current);
+            return () => observer.disconnect();
+          }, []);
+
+          return (
+            <div
+              ref={domRef}
+              className={`transition-all duration-1000 ease-out transform ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+              } ${className}`}
+              style={{ transitionDelay: `${delay}ms` }}
+            >
+              {children}
+            </div>
+          );
+        };
+
+        // 2. Dynamic Text Component
+        const TextRotator = ({ words, colorClass = "text-white" }) => {
+          const [index, setIndex] = useState(0);
+          const [fade, setFade] = useState(true);
+
+          useEffect(() => {
+            const interval = setInterval(() => {
+              setFade(false);
+              setTimeout(() => {
+                setIndex((prev) => (prev + 1) % words.length);
+                setFade(true);
+              }, 500);
+            }, 3000);
+            return () => clearInterval(interval);
+          }, [words]);
+
+          return (
+            <span className={`inline-block transition-opacity duration-500 ${fade ? 'opacity-100' : 'opacity-0'} ${colorClass}`}>
+              {words[index]}
+            </span>
+          );
+        };
+
+        // 3. Number Counter Animation
+        const NumberCounter = ({ end, decimals = 0, duration = 2000, prefix = "", suffix = "" }) => {
+          const [count, useStateCount] = useState(0);
+          const [isVisible, setVisible] = useState(false);
+          const domRef = useRef();
+
+          useEffect(() => {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                if (entries[0].isIntersecting) {
+                  setVisible(true);
+                  observer.disconnect();
+                }
+              },
+              { threshold: 0.5 }
+            );
+            if (domRef.current) observer.observe(domRef.current);
+            return () => observer.disconnect();
+          }, []);
+
+          useEffect(() => {
+            if (!isVisible) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+              if (!startTimestamp) startTimestamp = timestamp;
+              const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+              const easeProgress = 1 - Math.pow(1 - progress, 3);
+              useStateCount(easeProgress * end);
+              if (progress < 1) {
+                window.requestAnimationFrame(step);
+              } else {
+                useStateCount(end);
+              }
+            };
+            window.requestAnimationFrame(step);
+          }, [isVisible, end, duration]);
+
+          const displayValue = decimals > 0 ? count.toFixed(decimals) : Math.floor(count).toLocaleString();
+          return <span ref={domRef}>{prefix}{displayValue}{suffix}</span>;
+        };
+
+        // 4. Monochrome Big Data Background
+        const NetworkBackground = () => {
+          const canvasRef = useRef(null);
+
+          useEffect(() => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let animationFrameId;
+
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+            canvas.width = w;
+            canvas.height = h;
+
+            const resize = () => {
+              w = window.innerWidth;
+              h = window.innerHeight;
+              canvas.width = w;
+              canvas.height = h;
+            };
+            window.addEventListener('resize', resize);
+
+            class Particle {
+              constructor() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 2;
+              }
+              update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > w) this.vx = -this.vx;
+                if (this.y < 0 || this.y > h) this.vy = -this.vy;
+              }
+              draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fill();
+              }
+            }
+
+            for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+            const animate = () => {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                for (let j = i + 1; j < particles.length; j++) {
+                  const dx = particles[i].x - particles[j].x;
+                  const dy = particles[i].y - particles[j].y;
+                  const distance = Math.sqrt(dx * dx + dy * dy);
+                  if (distance < 150) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 - distance/500})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                  }
+                }
+              }
+              animationFrameId = requestAnimationFrame(animate);
+            };
+
+            animate();
+            return () => {
+              window.removeEventListener('resize', resize);
+              cancelAnimationFrame(animationFrameId);
+            };
+          }, []);
+
+          return (
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+              <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-40" />
+            </div>
+          );
+        };
+
+        // YOUTUBE AUTO CONVERTER HELPER
+        const getEmbedUrl = (url) => {
+          if (!url) return '';
+          try {
+            if (url.includes('youtube.com/embed/')) return url;
+            let videoId = '';
+            if (url.includes('youtube.com/watch')) {
+              const urlObj = new URL(url);
+              videoId = urlObj.searchParams.get('v');
+            } else if (url.includes('youtu.be/')) {
+              videoId = url.split('youtu.be/')[1].split(/[?#]/)[0];
+            } else if (url.includes('youtube.com/shorts/')) {
+              videoId = url.split('shorts/')[1].split(/[?#]/)[0];
+            }
+            if (videoId) {
+              return `https://www.youtube.com/embed/${videoId}?rel=0`;
+            }
+          } catch (e) {
+            console.error('Error parsing YT URL:', e);
+          }
+          return url;
+        };
+
+        // 5. Comet Background
+        const CometBackground = () => (
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-[10%] left-[-10%] w-[200px] h-[2px] bg-gradient-to-r from-transparent via-white to-transparent opacity-0 animate-comet" style={{ animationDelay: '0s', animationDuration: '4s' }}></div>
+            <div className="absolute top-[40%] left-[-10%] w-[300px] h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-0 animate-comet" style={{ animationDelay: '2.5s', animationDuration: '6s' }}></div>
+            <div className="absolute top-[80%] left-[-10%] w-[150px] h-[3px] bg-gradient-to-r from-transparent via-white to-transparent opacity-0 animate-comet" style={{ animationDelay: '5s', animationDuration: '5s' }}></div>
+          </div>
+        );
+
+        // 6. Typewriter Terminal
+        const TypewriterTerminal = () => {
+          const [lines, setLines] = useState([]);
+          useEffect(() => {
+            let isMounted = true;
+            let timeoutId;
+            const script = [
+              { type: 'input', fullText: "jarvis@core:~$ initialize_engine --mode=production", delayAfter: 800 },
+              { type: 'output', fullText: "[OK] Core connected. Analyzing market structure...", delayAfter: 400 },
+              { type: 'output', fullText: "[OK] Friday Auditor online. Validating...", delayAfter: 1000 },
+              { type: 'input', fullText: "jarvis@core:~$ await signal", delayAfter: 1500 },
+              { type: 'alert', fullText: ">> NEW ENTRY DETECTED: ICT_SILVER_BULLET", delayAfter: 600 },
+              { type: 'process', fullText: ">> Calculating win probabilities...", delayAfter: 1200 },
+              { type: 'success', fullText: ">> Transmitting to Capital Nerds Network.", delayAfter: 4000 }
+            ];
+
+            const typeLine = async (line) => {
+              setLines(prev => [...prev, { ...line, currentText: "" }]);
+              if (line.type === 'input' || line.type === 'process') {
+                for (let i = 0; i < line.fullText.length; i++) {
+                  if (!isMounted) return;
+                  await new Promise(r => setTimeout(r, 15 + Math.random() * 20));
+                  setLines(prev => {
+                    const newLines = [...prev];
+                    newLines[newLines.length - 1].currentText = line.fullText.substring(0, i + 1);
+                    return newLines;
+                  });
+                }
+              } else {
+                setLines(prev => {
+                  const newLines = [...prev];
+                  newLines[newLines.length - 1].currentText = line.fullText;
+                  return newLines;
+                });
+              }
+            };
+
+            const processScript = async () => {
+              setLines([]);
+              for (let i = 0; i < script.length; i++) {
+                if (!isMounted) return;
+                await typeLine(script[i]);
+                if (!isMounted) return;
+                await new Promise(r => setTimeout(r, script[i].delayAfter));
+              }
+              if (isMounted) {
+                timeoutId = setTimeout(processScript, 3000);
+              }
+            };
+
+            processScript();
+            return () => {
+              isMounted = false;
+              clearTimeout(timeoutId);
+            };
+          }, []);
+
+          return (
+            <div className="relative rounded-2xl border border-gray-800/80 bg-[#080808] p-8 overflow-hidden shadow-[0_0_40px_rgba(34,197,94,0.03)] hover:border-gray-700 hover:shadow-[0_0_50px_rgba(34,197,94,0.06)] transition-all duration-500 min-h-[320px]">
+              <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-500/50 to-transparent"></div>
+              <div className="flex gap-2 mb-6">
+                <div className="w-3 h-3 rounded-full bg-gray-800"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-800"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-800"></div>
+              </div>
+              <div className="font-mono text-xs md:text-sm space-y-2 relative z-10">
+                {lines.map((line, i) => (
+                  <div key={i} className={`
+                    ${line.type === 'input' ? 'text-gray-300' : ''}
+                    ${line.type === 'output' ? 'text-gray-500' : ''}
+                    ${line.type === 'alert' ? 'text-white font-semibold opacity-90 mt-4' : ''}
+                    ${line.type === 'process' ? 'text-cyan-400' : ''}
+                    ${line.type === 'success' ? 'text-green-400 font-bold drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]' : ''}
+                  `}>
+                    {line.type === 'input' ? (
+                      <span><span className="text-gray-500">jarvis@core</span>:~$ {line.currentText.replace('jarvis@core:~$ ', '')}</span>
+                    ) : (
+                      <span>{line.currentText}</span>
+                    )}
+                  </div>
+                ))}
+                <div className="animate-pulse inline-block w-2 h-4 bg-white mt-1 ml-1 align-middle shadow-[0_0_8px_white]"></div>
+              </div>
+            </div>
+          );
+        };
+
+        // ============================================================================
+        // 🚀 LLM LIVE DEMO COMPONENT
+        // ============================================================================
+        const LiveLLMDemo = () => {
+            const [newsInput, setNewsInput] = useState("");
+            const [isLoading, setIsLoading] = useState(false);
+            const [result, setResult] = useState(null);
+            const [error, setError] = useState(null);
+            const [hasReachedLimit, setHasReachedLimit] = useState(false);
+            const [timeRemaining, setTimeRemaining] = useState("");
+
+            useEffect(() => {
+                const checkLimit = () => {
+                    const lastUsage = localStorage.getItem('jarvisDemoLastUsage');
+                    if (lastUsage) {
+                        const now = new Date().getTime();
+                        const diff = now - parseInt(lastUsage);
+                        const twentyFourHours = 24 * 60 * 60 * 1000;
+                        
+                        if (diff < twentyFourHours) {
+                            setHasReachedLimit(true);
+                            const remaining = twentyFourHours - diff;
+                            const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+                            const minutes = Math.floor((remaining / 1000 / 60) % 60);
+                            setTimeRemaining(`${hours}j ${minutes}m`);
+                        } else {
+                            setHasReachedLimit(false);
+                            localStorage.removeItem('jarvisDemoLastUsage');
+                        }
+                    }
+                };
+                
+                checkLimit();
+                // Update timer setiap 1 menit jika sedang dilimit
+                const interval = setInterval(checkLimit, 60000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleAnalyze = async () => {
+                if (!newsInput.trim() || hasReachedLimit) return;
+                setIsLoading(true);
+                setError(null);
+                setResult(null);
+
+                try {
+                    const aiResponse = await callGeminiLLM(newsInput);
+                    setResult(aiResponse);
+                    
+                    // Kunci akses pengguna setelah sukses (Set limit 24 jam)
+                    localStorage.setItem('jarvisDemoLastUsage', new Date().getTime().toString());
+                    setHasReachedLimit(true);
+                    setTimeRemaining("23j 59m");
+                } catch (err) {
+                    setError("Jarvis semantic engine failed to connect. Try again later.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="w-full mt-12 bg-[#050505] rounded-2xl border border-cyan-900/40 p-6 md:p-8 relative overflow-hidden group shadow-[0_0_30px_rgba(6,182,212,0.05)]">
+                    {/* Glowing effect */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[80px] rounded-full pointer-events-none transition-opacity duration-500"></div>
+                    
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-8 h-8 rounded-lg bg-cyan-950/50 border border-cyan-800 flex items-center justify-center">
+                                <Database size={16} className="text-cyan-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white leading-tight">Live LLM Validation Demo</h3>
+                                <p className="text-xs text-gray-400">Test how Jarvis perceives market-moving news in real-time.</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-3 mt-6">
+                            <input 
+                                type="text" 
+                                value={newsInput}
+                                onChange={(e) => setNewsInput(e.target.value)}
+                                placeholder="Paste a recent financial news headline here (e.g. 'Fed hikes interest rate...')"
+                                className="flex-1 bg-[#0a0a0a] border border-gray-800 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-700 transition-colors disabled:opacity-50 disabled:bg-[#030303]"
+                                onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
+                                disabled={hasReachedLimit}
+                            />
+                            <button 
+                                onClick={handleAnalyze}
+                                disabled={isLoading || !newsInput.trim() || hasReachedLimit}
+                                className="bg-cyan-950 hover:bg-cyan-900 text-cyan-400 border border-cyan-800 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div> Processing...</span>
+                                ) : hasReachedLimit ? (
+                                    <span>⏳ Limit Tercapai</span>
+                                ) : (
+                                    <span>✨ Run Sentiment Analysis</span>
+                                )}
+                            </button>
+                        </div>
+
+                        {hasReachedLimit && (
+                            <p className="text-xs text-yellow-500/80 mt-3 flex items-center gap-1.5 font-mono">
+                                <AlertTriangle size={12} /> Limit demo tercapai (1x per hari). Coba lagi dalam {timeRemaining}.
+                            </p>
+                        )}
+
+                        {/* Results Box */}
+                        {error && (
+                            <div className="mt-4 p-4 rounded-xl bg-red-950/20 border border-red-900/50 text-red-400 text-xs font-mono">
+                                {error}
+                            </div>
+                        )}
+
+                        {result && (
+                            <div className="mt-6 p-5 rounded-xl bg-[#080808] border border-gray-800 relative overflow-hidden">
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-400 to-transparent"></div>
+                                <div className="flex flex-wrap items-center gap-6 mb-4">
+                                    <div>
+                                        <p className="text-[10px] text-gray-500 font-mono uppercase mb-1">Sentiment</p>
+                                        <span className={`text-lg font-bold ${result.sentiment === 'BULLISH' ? 'text-green-400' : result.sentiment === 'BEARISH' ? 'text-red-400' : 'text-gray-400'}`}>
+                                            {result.sentiment}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-gray-500 font-mono uppercase mb-1">Confidence Score</p>
+                                        <span className="text-lg font-bold text-white flex items-baseline gap-1">
+                                            {result.confidence} <span className="text-xs text-gray-500">%</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-gray-500 font-mono uppercase mb-1">Jarvis Reasoning</p>
+                                    <p className="text-sm text-gray-300 leading-relaxed border-l border-gray-800 pl-3">
+                                        "{result.reasoning}"
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // VISUAL COMPONENTS
+        const DataIngestionVisual = () => (
+          <div className="w-full h-full bg-[#050505] rounded-2xl border border-gray-800 flex flex-col overflow-hidden relative shadow-2xl group">
+            <div className="h-8 border-b border-gray-800 bg-[#0a0a0a] flex items-center px-4 gap-2 shrink-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
+              <span className="text-[10px] text-gray-500 font-mono ml-2 flex items-center gap-1"><Terminal size={10} /> root@jarvis_scraper</span>
+            </div>
+            <div className="flex-1 relative p-4 overflow-hidden font-mono text-[8px] sm:text-[10px] leading-tight text-green-500/70">
+              <div className="absolute top-0 left-4 right-4 flex gap-4 animate-scroll-vertical">
+                <div className="flex flex-col gap-1 w-1/3">
+                  {[...Array(30)].map((_, i) => <span key={`a-${i}`}>[REQ_{i}] GET /api/v1/ticker?sym=BTCUSDT HTTP/2 200 OK</span>)}
+                </div>
+                <div className="flex flex-col gap-1 w-1/3 text-gray-500/70">
+                  {[...Array(30)].map((_, i) => <span key={`b-${i}`}>0x{Math.floor(Math.random() * 100000).toString(16).toUpperCase()} FLOW_DATA_STREAM: {Math.random().toFixed(4)}</span>)}
+                </div>
+                <div className="flex flex-col gap-1 w-1/3 text-cyan-500/70">
+                  {[...Array(30)].map((_, i) => <span key={`c-${i}`}>VOL_DELTA: +{Math.floor(Math.random() * 500)} INGESTION_RATE: {(Math.random() * 10).toFixed(2)}ms</span>)}
+                </div>
+              </div>
+              <div className="absolute left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_20px_#22d3ee] animate-scanline z-10 opacity-80"></div>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#050505] to-transparent z-20"></div>
+          </div>
+        );
+
+        const AlgorithmicFilterVisual = () => (
+          <div className="w-full h-full bg-gradient-to-b from-[#0a0a0a] to-[#020202] rounded-2xl border border-gray-800 relative overflow-hidden flex items-center justify-center group shadow-2xl">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+            <div className="relative w-3/4 h-3/4 flex flex-col items-center justify-between z-10">
+              <div className="w-full h-px bg-gray-700 relative flex justify-center">
+                <span className="absolute -top-5 text-[10px] font-mono text-gray-400 bg-[#050505] px-2 rounded">INPUT_LAYER</span>
+                <div className="absolute top-0 w-3 h-3 bg-red-500 rounded animate-filter-drop shadow-[0_0_10px_#ef4444]" style={{ left: '20%' }}></div>
+                <div className="absolute top-0 w-3 h-3 bg-green-500 rounded animate-filter-drop shadow-[0_0_10px_#22c55e]" style={{ left: '50%', animationDelay: '0.4s' }}></div>
+                <div className="absolute top-0 w-3 h-3 bg-red-500 rounded animate-filter-drop shadow-[0_0_10px_#ef4444]" style={{ left: '80%', animationDelay: '0.8s' }}></div>
+              </div>
+              <div className="w-3/4 h-px bg-cyan-900/50 relative flex justify-center shadow-[0_0_15px_#0891b2]">
+                <div className="absolute inset-0 bg-cyan-400/20 blur-sm h-4 -top-2"></div>
+                <span className="absolute -top-5 text-[10px] font-mono text-cyan-400 bg-[#050505] px-2 rounded border border-cyan-900">PROBABILITY_FILTER (80%+)</span>
+              </div>
+              <div className="w-1/2 h-px bg-green-900/50 relative flex justify-center">
+                <span className="absolute top-3 text-[10px] font-mono text-green-400 bg-green-900/20 px-2 rounded border border-green-800 shadow-[0_0_10px_#166534]">VALID_SETUP</span>
+                <div className="absolute -top-16 w-3 h-3 bg-green-500 rounded animate-filter-pass shadow-[0_0_15px_#22c55e]" style={{ left: '50%', animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+          </div>
+        );
+
+        const LLMValidationVisual = () => (
+          <div className="w-full h-full bg-[#030303] rounded-2xl border border-gray-800 relative flex items-center justify-center overflow-hidden group shadow-2xl">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path d="M 20 50 Q 35 20 50 50 T 80 50" fill="none" stroke="#1f2937" strokeWidth="0.5" />
+              <path d="M 20 50 Q 50 80 80 50" fill="none" stroke="#1f2937" strokeWidth="0.5" />
+              <path d="M 50 20 L 50 80" fill="none" stroke="#1f2937" strokeWidth="0.5" />
+              <path d="M 35 35 L 65 65" fill="none" stroke="#1f2937" strokeWidth="0.5" />
+              <circle r="1" fill="#22d3ee" className="animate-flow-path-1 shadow-[0_0_8px_#22d3ee]">
+                <animateMotion dur="2s" repeatCount="indefinite" path="M 20 50 Q 35 20 50 50" />
+              </circle>
+              <circle r="1" fill="#22d3ee" className="animate-flow-path-2 shadow-[0_0_8px_#22d3ee]">
+                <animateMotion dur="2.5s" repeatCount="indefinite" path="M 50 50 T 80 50" />
+              </circle>
+              <circle r="1.5" fill="#4ade80" className="animate-flow-path-3 shadow-[0_0_10px_#4ade80]">
+                <animateMotion dur="1.8s" repeatCount="indefinite" path="M 20 50 Q 50 80 80 50" />
+              </circle>
+            </svg>
+            <div className="absolute w-8 h-8 bg-gray-900 border border-gray-700 rounded-full flex items-center justify-center shadow-lg transform -translate-x-[60px]"><Database size={12} className="text-gray-400" /></div>
+            <div className="absolute w-10 h-10 bg-[#0a0a0a] border border-cyan-800 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.2)] animate-pulse-slow"><BrainCircuit size={18} className="text-cyan-400" /></div>
+            <div className="absolute w-8 h-8 bg-gray-900 border border-gray-700 rounded-full flex items-center justify-center shadow-lg transform translate-x-[60px]"><Code2 size={12} className="text-gray-400" /></div>
+            <div className="absolute w-6 h-6 bg-gray-900 border border-gray-700 rounded-full flex items-center justify-center shadow-lg transform -translate-y-[40px] text-[8px] font-mono text-gray-500">NEWS</div>
+            <div className="absolute w-6 h-6 bg-gray-900 border border-gray-700 rounded-full flex items-center justify-center shadow-lg transform translate-y-[40px] text-[8px] font-mono text-gray-500">SENT</div>
+          </div>
+        );
+
+        const ZeroLatencyVisual = () => (
+          <div className="w-full h-full bg-[#050505] rounded-2xl border border-gray-800 relative flex items-center justify-center overflow-hidden shadow-2xl group">
+            <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            <div className="relative w-full px-6 flex items-center justify-between z-10">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-center z-10">
+                  <LineChart size={16} className="text-blue-400" />
+                </div>
+                <span className="text-[9px] font-mono text-gray-500 bg-black px-1 rounded border border-gray-800">Source</span>
+              </div>
+              <div className="flex-1 h-[2px] bg-gray-800 relative mx-2">
+                <div className="absolute top-1/2 left-0 w-3 h-[2px] bg-blue-500 shadow-[0_0_10px_#3b82f6] -translate-y-1/2 animate-data-shoot"></div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 bg-[#0a0a0a] border border-cyan-800 rounded-xl flex items-center justify-center z-10 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:scale-110 transition-transform">
+                  <Server size={20} className="text-cyan-400" />
+                </div>
+                <span className="text-[9px] font-mono text-cyan-500 bg-cyan-950/30 px-1 rounded border border-cyan-900">Jarvis_VPS</span>
+              </div>
+              <div className="flex-1 h-[2px] bg-gray-800 relative mx-2">
+                <div className="absolute top-1/2 left-0 w-3 h-[2px] bg-green-500 shadow-[0_0_10px_#22c55e] -translate-y-1/2 animate-data-shoot" style={{ animationDelay: '0.5s' }}></div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 bg-gray-900 border border-green-900 rounded-xl flex items-center justify-center z-10 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                  <MessageSquare size={16} className="text-green-400" />
+                </div>
+                <span className="text-[9px] font-mono text-green-500 bg-green-950/30 px-1 rounded border border-green-900">Execution</span>
+              </div>
+            </div>
+          </div>
+        );
+
+        const JarvisCore3DVisual = () => (
+          <div className="relative w-full aspect-square flex items-center justify-center group" style={{ perspective: '1200px' }}>
+            <div className="absolute w-[80%] h-[80%] bg-[radial-gradient(circle_at_center,_rgba(6,182,212,0.2)_0%,_transparent_70%)] blur-[40px] pointer-events-none mix-blend-screen transition-opacity duration-700 opacity-70 group-hover:opacity-100"></div>
+            <div className="absolute w-[85%] h-[85%] rounded-full border border-gray-800/80 border-t-cyan-400/80 shadow-[inset_0_0_30px_rgba(6,182,212,0.15)] animate-gyro-1" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="absolute top-0 left-1/2 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_15px_#22d3ee] -translate-x-1/2 -translate-y-1/2"></div>
+            </div>
+            <div className="absolute w-[70%] h-[70%] rounded-full border border-gray-800/80 border-b-blue-500/80 shadow-[inset_0_0_30px_rgba(59,130,246,0.15)] animate-gyro-2" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 bg-blue-400 rounded-full shadow-[0_0_10px_#3b82f6] -translate-x-1/2 translate-y-1/2"></div>
+            </div>
+            <div className="absolute w-[55%] h-[55%] rounded-full border border-gray-800/80 border-l-purple-500/80 shadow-[inset_0_0_30px_rgba(168,85,247,0.15)] animate-gyro-3" style={{ transformStyle: 'preserve-3d' }}></div>
+            <div className="relative w-32 h-32 rounded-full flex items-center justify-center animate-core-float z-10 group-hover:scale-105 transition-transform duration-700 shadow-[0_0_60px_rgba(6,182,212,0.5)]" style={{ transformStyle: 'preserve-3d' }}>
+              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,_#22d3ee_0%,_#0e7490_40%,_#020617_90%)] opacity-90 shadow-[inset_-15px_-15px_30px_rgba(0,0,0,0.8),inset_10px_10px_30px_rgba(255,255,255,0.4)] overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_45%,#22d3ee_50%,transparent_55%)] bg-[length:100%_200%] animate-scan-orb opacity-30 mix-blend-overlay"></div>
+              </div>
+              <Cpu size={40} className="text-white drop-shadow-[0_0_20px_#fff] z-20 relative animate-pulse-slow" style={{ transform: 'translateZ(20px)' }} />
+            </div>
+          </div>
+        );
+
+        // MAIN APP
+        function App() {
+          const [isScrolled, setIsScrolled] = useState(false);
+          const [showTerms, setShowTerms] = useState(false);
+
+          // Duplicate array for endless scroll seamless loop
+          const proofItems = [...CONFIG.proofOfEdge, ...CONFIG.proofOfEdge];
+
+          useEffect(() => {
+            const handleScroll = () => setIsScrolled(window.scrollY > 20);
+            window.addEventListener('scroll', handleScroll);
+            return () => window.removeEventListener('scroll', handleScroll);
+          }, []);
+
+          return (
+            <div className="min-h-screen bg-[#010101] text-gray-200 font-sans selection:bg-gray-800 selection:text-white relative overflow-x-hidden">
+              <style dangerouslySetInnerHTML={{__html: `
+                @keyframes comet {
+                  0% { transform: translateX(-10vw) translateY(-10vh) rotate(45deg); opacity: 0; }
+                  10% { opacity: 1; }
+                  90% { opacity: 1; }
+                  100% { transform: translateX(110vw) translateY(110vh) rotate(45deg); opacity: 0; }
+                }
+                .animate-comet {
+                  animation-name: comet;
+                  animation-timing-function: linear;
+                  animation-iteration-count: infinite;
+                }
+                @keyframes glow-pulse {
+                  0%, 100% { box-shadow: 0 0 50px rgba(6,182,212,0.4), inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.2); }
+                  50% { box-shadow: 0 0 80px rgba(6,182,212,0.6), inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.4); }
+                }
+                .animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+                @keyframes gauge-fill {
+                  0% { stroke-dashoffset: 251.2; }
+                  100% { stroke-dashoffset: 38.9; }
+                }
+                .animate-gauge-fill {
+                  stroke-dasharray: 251.2;
+                  stroke-dashoffset: 251.2;
+                  animation: gauge-fill 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                  animation-delay: 0.2s;
+                }
+                @keyframes scroll-left {
+                  0% { transform: translateX(0); }
+                  100% { transform: translateX(calc(-274px * ${CONFIG.proofOfEdge.length})); }
+                }
+                .animate-scroll-left { animation: scroll-left 20s linear infinite; }
+                .animate-scroll-left:hover { animation-play-state: paused; }
+                @keyframes flow-dot {
+                  0% { transform: translateY(0); opacity: 0; }
+                  20% { opacity: 1; }
+                  80% { opacity: 1; }
+                  100% { transform: translateY(200px); opacity: 0; }
+                }
+                .animate-flow-dot { animation: flow-dot 2s linear infinite; }
+                @keyframes scroll-vertical {
+                  0% { transform: translateY(100%); }
+                  100% { transform: translateY(-100%); }
+                }
+                .animate-scroll-vertical { animation: scroll-vertical 15s linear infinite; }
+                @keyframes scanline {
+                  0%, 100% { top: -10px; }
+                  50% { top: 110%; }
+                }
+                .animate-scanline { animation: scanline 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+                @keyframes filter-drop {
+                  0% { transform: translateY(0) scale(1); opacity: 1; }
+                  100% { transform: translateY(50px) scale(0); opacity: 0; }
+                }
+                .animate-filter-drop { animation: filter-drop 1.5s ease-in infinite; }
+                @keyframes filter-pass {
+                  0% { transform: translateY(0) scale(1); opacity: 0; }
+                  20% { opacity: 1; }
+                  100% { transform: translateY(70px) scale(1.5); opacity: 0; }
+                }
+                .animate-filter-pass { animation: filter-pass 1.5s ease-out infinite; }
+                @keyframes data-shoot {
+                  0% { left: 0%; opacity: 0; }
+                  10% { opacity: 1; }
+                  90% { opacity: 1; }
+                  100% { left: 100%; opacity: 0; }
+                }
+                .animate-data-shoot { animation: data-shoot 1s linear infinite; }
+                @keyframes gyro-1 {
+                  0% { transform: rotateX(60deg) rotateY(0deg) rotateZ(0deg); }
+                  100% { transform: rotateX(60deg) rotateY(0deg) rotateZ(360deg); }
+                }
+                .animate-gyro-1 { animation: gyro-1 8s linear infinite; }
+                @keyframes gyro-2 {
+                  0% { transform: rotateX(45deg) rotateY(60deg) rotateZ(0deg); }
+                  100% { transform: rotateX(45deg) rotateY(60deg) rotateZ(-360deg); }
+                }
+                .animate-gyro-2 { animation: gyro-2 12s linear infinite; }
+                @keyframes gyro-3 {
+                  0% { transform: rotateX(75deg) rotateY(-45deg) rotateZ(0deg); }
+                  100% { transform: rotateX(75deg) rotateY(-45deg) rotateZ(360deg); }
+                }
+                .animate-gyro-3 { animation: gyro-3 10s linear infinite; }
+                @keyframes core-float {
+                  0%, 100% { transform: translateY(0px) scale(1); }
+                  50% { transform: translateY(-10px) scale(1.02); }
+                }
+                .animate-core-float { animation: core-float 4s ease-in-out infinite; }
+                @keyframes scan-orb {
+                  0% { background-position: 0% 0%; }
+                  100% { background-position: 0% -200%; }
+                }
+                .animate-scan-orb { animation: scan-orb 3s linear infinite; }
+                @keyframes ring-pulse-fill {
+                  0% { stroke-dasharray: 0 251.2; stroke-opacity: 0.2; transform: scale(0.95); }
+                  50% { stroke-dasharray: 200 251.2; stroke-opacity: 1; transform: scale(1); }
+                  100% { stroke-dasharray: 0 251.2; stroke-opacity: 0.2; transform: scale(0.95); }
+                }
+                .animate-ring-pulse-fill {
+                  animation: ring-pulse-fill 4s ease-in-out infinite;
+                  transform-origin: center;
+                }
+                @keyframes chart-flow {
+                  0% { transform: translateX(0); }
+                  100% { transform: translateX(-100px); }
+                }
+                .animate-chart-flow { animation: chart-flow 5s linear infinite; }
+                @keyframes orbit-bounce {
+                  0%, 100% { left: 0%; opacity: 0; }
+                  10% { opacity: 1; }
+                  90% { opacity: 1; }
+                  50% { left: 100%; }
+                }
+                .animate-orbit-bounce { animation: orbit-bounce 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+              `}} />
+
+              {/* Navbar */}
+              <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+                isScrolled ? 'bg-[#010101]/80 backdrop-blur-md border-gray-800/50 shadow-lg shadow-black/50' : 'bg-transparent border-transparent'
+              }`}>
+                <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-8 h-8 rounded flex items-center justify-center bg-transparent overflow-hidden">
+                      <span className="font-bold text-xl leading-none text-white drop-shadow-[0_0_8px_white]">&Sigma;</span>
+                    </div>
+                    <span className="font-semibold tracking-tight text-white">Capital Nerds</span>
+                  </div>
+                  <div className="hidden md:flex items-center gap-8 text-sm text-gray-400">
+                    <a href="#why-us" className="hover:text-white transition-colors">The Framework</a>
+                    <a href="#jarvis" className="hover:text-white transition-colors">Jarvis AI</a>
+                    <a href="#proof" className="hover:text-white transition-colors">Proof</a>
+                    <a href="#pricing" className="hover:text-white transition-colors">Access</a>
+                  </div>
+                  <button className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+                    Client Portal
+                  </button>
+                </div>
+              </nav>
+
+              {/* 1. Hero Section */}
+              <section className="relative pt-40 pb-20 px-6 overflow-hidden min-h-[95vh] flex flex-col justify-center">
+                <NetworkBackground />
+                <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-full max-w-5xl h-[600px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent -z-10 blur-3xl pointer-events-none opacity-70"></div>
+                <div className="absolute top-[40%] left-[10%] w-[500px] h-[500px] bg-gray-500/10 blur-[120px] rounded-full mix-blend-screen pointer-events-none"></div>
+                <div className="max-w-4xl mx-auto text-center relative z-20">
+                  <FadeInSection delay={0}>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-800 bg-[#0a0a0a] text-xs font-medium text-gray-300 mb-8 cursor-default shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_#4ade80]"></span>
+                      Jarvis Engine is <span className="text-green-400 font-semibold">Active</span>
+                    </div>
+                  </FadeInSection>
+                  <FadeInSection delay={150}>
+                    <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-6 leading-tight drop-shadow-2xl">
+                      <TextRotator words={["Algorithmic precision.", "Data-driven execution.", "Quantitative edge."]} />
+                      <br />
+                      <span className="text-gray-400">Zero emotion.</span>
+                    </h1>
+                  </FadeInSection>
+
+                  <FadeInSection delay={300}>
+                    <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                      We don't do guesswork. Capital Nerds provides quantitative trading intelligence driven by AI-filtered algorithms and real-time market data.
+                    </p>
+                  </FadeInSection>
+
+                  <FadeInSection delay={450}>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                      <a href="#pricing" className="h-12 px-6 rounded-full bg-white text-black font-semibold flex items-center justify-center gap-2 hover:bg-gray-200 transition-transform hover:scale-105 active:scale-95 duration-200 w-full sm:w-auto shadow-[0_0_25px_rgba(255,255,255,0.15)]">
+                        Get Access Now <ChevronRight size={18} />
+                      </a>
+                      <a href="#video" className="h-12 px-6 rounded-full bg-[#0a0a0a]/80 border border-gray-700 text-white font-medium flex items-center justify-center gap-2 hover:bg-[#111] hover:border-gray-500 transition-all w-full sm:w-auto backdrop-blur-md">
+                        Watch Manifesto <Play size={14} className="ml-1 text-gray-400" />
+                      </a>
+                    </div>
+                  </FadeInSection>
+                </div>
+              </section>
+
+              {/* 1.5 Video Introduction Section */}
+              <section id="video" className="py-24 px-6 border-t border-gray-900/50 relative bg-[#010101] overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] bg-cyan-500/5 blur-[120px] pointer-events-none"></div>
+
+                <div className="max-w-5xl mx-auto relative z-10 text-center">
+                  <FadeInSection delay={0}>
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                      {CONFIG.video.title}
+                    </h2>
+                    <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-12">
+                      {CONFIG.video.subtitle}
+                    </p>
+                  </FadeInSection>
+
+                  <FadeInSection delay={200}>
+                    <div className="relative mx-auto max-w-4xl aspect-video rounded-2xl overflow-hidden border border-gray-800 bg-[#050505] shadow-[0_0_50px_rgba(6,182,212,0.1)] group hover:border-gray-600 transition-all duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <iframe
+                        className="w-full h-full relative z-0"
+                        src={getEmbedUrl(CONFIG.video.youtubeLink)}
+                        title="Capital Nerds Manifesto"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  </FadeInSection>
+                </div>
+              </section>
+
+              {/* 2. Vertical Timeline (Why Choose Us) */}
+              <section id="why-us" className="py-32 px-6 border-t border-gray-900/50 relative bg-[#010101] overflow-hidden">
+                <CometBackground />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[1000px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-[#010101] to-[#010101] -z-10 blur-[100px] pointer-events-none"></div>
+                <div className="max-w-5xl mx-auto relative z-10">
+                  <FadeInSection>
+                    <div className="text-center mb-24">
+                      <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                        <TextRotator words={["The Quant Framework.", "The Edge Protocol.", "Systematic Logic."]} colorClass="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500" />
+                      </h2>
+                      <p className="text-gray-400 max-w-2xl mx-auto text-lg">How we extract probability from chaos. Step-by-step.</p>
+                    </div>
+                  </FadeInSection>
+
+                  <div className="absolute left-4 md:left-1/2 top-[200px] bottom-0 w-[2px] bg-gradient-to-b from-gray-800 via-gray-700 to-transparent md:-translate-x-1/2 rounded-full overflow-hidden">
+                    <div className="w-full h-8 bg-white blur-[2px] animate-flow-dot"></div>
+                    <div className="w-full h-8 bg-white blur-[2px] animate-flow-dot" style={{animationDelay: '1s'}}></div>
+                  </div>
+
+                  <div className="space-y-28 relative z-10">
+                    {CONFIG.timeline.map((item, index) => (
+                      <div key={index} className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 ${index % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
+                        <div className="absolute left-4 md:left-1/2 w-5 h-5 rounded-full bg-black border-[4px] border-white md:-translate-x-1/2 transform -translate-y-1/2 mt-12 md:mt-0 z-20 shadow-[0_0_15px_rgba(255,255,255,0.5)]"></div>
+                        <div className={`w-full md:w-1/2 pl-12 md:pl-0 ${index % 2 !== 0 ? 'md:text-left' : 'md:text-right'}`}>
+                          <FadeInSection delay={100} className="bg-[#050505]/80 backdrop-blur-xl p-8 rounded-2xl border border-gray-800/80 hover:border-gray-500 hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 group">
+                            <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-gray-200 transition-colors">{item.title}</h3>
+                            <p className="text-gray-400 leading-relaxed">{item.desc}</p>
+                          </FadeInSection>
+                        </div>
+                        <div className="w-full md:w-1/2 pl-12 md:pl-0 flex justify-center">
+                          <FadeInSection delay={200} className="w-full">
+                            <div className="aspect-[4/3] rounded-2xl border-none bg-transparent flex flex-col items-center justify-center relative overflow-hidden group">
+                              {index === 0 && <DataIngestionVisual />}
+                              {index === 1 && <AlgorithmicFilterVisual />}
+                              {index === 2 && <LLMValidationVisual />}
+                              {index === 3 && <ZeroLatencyVisual />}
+                              <span className="text-[10px] font-mono text-gray-600 mt-4 relative z-10">[ Module: {item.img} ]</span>
+                            </div>
+                          </FadeInSection>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* 3. Meet Jarvis */}
+              <section id="jarvis" className="py-32 px-6 border-t border-gray-900/50 bg-[#010101] overflow-hidden relative">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/5 blur-[150px] rounded-full pointer-events-none"></div>
+
+                <div className="max-w-6xl mx-auto relative z-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <FadeInSection delay={0}>
+                      <JarvisCore3DVisual />
+                    </FadeInSection>
+
+                    <div>
+                      <FadeInSection delay={100}>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-cyan-900/30 bg-cyan-900/10 text-xs font-medium text-cyan-400 mb-6 shadow-[0_0_15px_rgba(6,182,212,0.05)]">
+                          <Network size={14} /> Neural Processing Layer
+                        </div>
+                      </FadeInSection>
+                      <FadeInSection delay={200}>
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
+                          <TextRotator words={["Meet Jarvis.", "The AI Engine.", "Your Unfair Edge."]} />
+                        </h2>
+                      </FadeInSection>
+                      <FadeInSection delay={300}>
+                        <p className="text-gray-300 mb-6 leading-relaxed text-lg">
+                          Jarvis isn't just a basic scanner. It's a high-frequency quantitative engine designed to ingest thousands of market variables, order book flows, and historical datasets in milliseconds.
+                        </p>
+                      </FadeInSection>
+                      <FadeInSection delay={400}>
+                        <p className="text-gray-500 leading-relaxed mb-10">
+                          While human traders hesitate out of <span className="text-red-400/80">fear</span> or over-leverage out of <span className="text-red-400/80">greed</span>, Jarvis eliminates cognitive bias. It executes strictly based on probabilistic models, filtering out the noise and securing the edge.
+                        </p>
+                      </FadeInSection>
+                      <FadeInSection delay={500}>
+                        <div className="grid grid-cols-2 gap-6 border-t border-gray-900 pt-8">
+                          <div className="group">
+                            <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] group-hover:scale-150 transition-transform"></div> 24/7 Processing
+                            </h4>
+                            <p className="text-sm text-gray-500">Relentless market surveillance without human fatigue.</p>
+                          </div>
+                          <div className="group">
+                            <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] group-hover:scale-150 transition-transform"></div> Deep Filtering
+                            </h4>
+                            <p className="text-sm text-gray-500">LLM validation rejects low-probability entries instantly.</p>
+                          </div>
+                        </div>
+                      </FadeInSection>
+                    </div>
+                  </div>
+
+                  {/* LIVE LLM DEMO COMPONENT PLACED HERE */}
+                  <FadeInSection delay={600}>
+                    <LiveLLMDemo />
+                  </FadeInSection>
+                </div>
+              </section>
+
+              {/* 4. Sneak Peek / Auditor Section */}
+              <section id="performance" className="py-24 px-6 border-t border-gray-900/50 bg-[#010101] relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent -z-10 blur-3xl"></div>
+
+                <div className="max-w-6xl mx-auto">
+                  <FadeInSection>
+                    <div className="mb-16 md:text-center">
+                      <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">Verified by Friday Auditor.</h2>
+                      <p className="text-gray-400 max-w-2xl mx-auto">
+                        Every signal generated by the Jarvis engine is strictly backtested and forward-tested. Here is our current performance snapshot.
+                      </p>
+                      <p className="text-xs text-gray-600 mt-4">Last updated: {CONFIG.performance.lastUpdate}</p>
+                    </div>
+                  </FadeInSection>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FadeInSection delay={0}>
+                      <div className="p-6 rounded-2xl border border-gray-800 bg-[#050505] hover:bg-[#0a0a0a] hover:border-green-900/50 transition-all duration-300 relative overflow-hidden min-h-[220px] flex flex-col justify-end group shadow-lg">
+                        <div className="absolute -right-6 -top-6 w-48 h-48 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_15px_rgba(34,197,94,0.4)] transform -rotate-90">
+                            <circle cx="50" cy="50" r="40" stroke="#111" strokeWidth="4" fill="none" />
+                            <circle cx="50" cy="50" r="40" stroke="#22c55e" strokeWidth="6" fill="none" strokeLinecap="round" className="animate-ring-pulse-fill" />
+                          </svg>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-6 relative z-10 backdrop-blur-md">
+                          <BarChart3 size={24} className="text-green-400" />
+                        </div>
+                        <p className="text-gray-400 text-sm font-medium mb-1 relative z-10">Overall Win Rate</p>
+                        <h3 className="text-5xl font-bold text-white relative z-10 tracking-tight drop-shadow-md">
+                          <NumberCounter end={CONFIG.performance.winRate} decimals={1} suffix="%" />
+                        </h3>
+                      </div>
+                    </FadeInSection>
+                    <FadeInSection delay={150}>
+                      <div className="p-6 rounded-2xl border border-gray-800 bg-[#050505] hover:bg-[#0a0a0a] hover:border-gray-600 transition-all duration-300 relative overflow-hidden min-h-[220px] flex flex-col justify-end group shadow-lg">
+                        <div className="absolute bottom-0 left-0 w-[200%] h-24 opacity-20 group-hover:opacity-40 transition-opacity duration-500 overflow-hidden">
+                          <svg className="w-full h-full animate-chart-flow" preserveAspectRatio="none" viewBox="0 0 200 100">
+                            <path d="M0,100 L0,80 L20,90 L40,60 L60,70 L80,30 L100,50 L120,80 L140,40 L160,70 L180,20 L200,50 L200,100 Z" fill="url(#grad-white)" />
+                            <path d="M0,80 L20,90 L40,60 L60,70 L80,30 L100,50 L120,80 L140,40 L160,70 L180,20 L200,50" fill="none" stroke="#fff" strokeWidth="1.5" />
+                            <defs>
+                              <linearGradient id="grad-white" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#fff" stopOpacity="0.4" />
+                                <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 relative z-10 backdrop-blur-md">
+                          <Activity size={24} className="text-white" />
+                        </div>
+                        <p className="text-gray-400 text-sm font-medium mb-1 relative z-10">Trades Analyzed</p>
+                        <h3 className="text-5xl font-bold text-white relative z-10 tracking-tight drop-shadow-md">
+                          <NumberCounter end={CONFIG.performance.totalTrades} />
+                        </h3>
+                      </div>
+                    </FadeInSection>
+                    <FadeInSection delay={300}>
+                      <div className="p-6 rounded-2xl border border-gray-800 bg-[#050505] hover:bg-[#0a0a0a] hover:border-cyan-900/50 transition-all duration-300 relative overflow-hidden min-h-[220px] flex flex-col justify-end group shadow-lg">
+                        <div className="absolute left-6 right-6 top-12 h-px bg-gray-800">
+                          <div className="absolute top-0 w-2 h-2 bg-green-400 rounded-full shadow-[0_0_8px_#4ade80] animate-orbit-bounce -translate-y-1/2"></div>
+                          <div className="absolute top-0 w-2 h-2 bg-red-400 rounded-full shadow-[0_0_8px_#ef4444] animate-orbit-bounce -translate-y-1/2" style={{animationDelay: '1.5s', animationDirection: 'reverse'}}></div>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6 relative z-10 backdrop-blur-md">
+                          <BrainCircuit size={24} className="text-cyan-400" />
+                        </div>
+                        <p className="text-gray-400 text-sm font-medium mb-1 relative z-10">Active Core Strategies</p>
+                        <h3 className="text-xl font-bold text-white mt-2 leading-tight relative z-10">{CONFIG.performance.activeStrategies}</h3>
+                      </div>
+                    </FadeInSection>
+                  </div>
+                </div>
+              </section>
+
+              {/* 5. Features Outline & Terminal */}
+              <section id="engine" className="py-24 px-6 border-t border-gray-900/50 relative bg-[#010101]">
+                <CometBackground />
+                <div className="max-w-6xl mx-auto relative z-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <FadeInSection>
+                      <div>
+                        <h2 className="text-3xl font-bold text-white mb-6 tracking-tight">The Quant Advantage.</h2>
+                        <ul className="space-y-6">
+                          <li className="flex gap-4 group">
+                            <div className="mt-1 w-8 h-8 rounded-lg bg-[#0a0a0a] border border-gray-800 flex items-center justify-center shrink-0 group-hover:border-green-500/50 group-hover:shadow-[0_0_15px_rgba(34,197,94,0.1)] transition-all">
+                              <Zap size={14} className="text-white group-hover:text-green-400 transition-colors" />
+                            </div>
+                            <div>
+                              <h4 className="text-white font-semibold mb-1">Real-time Execution</h4>
+                              <p className="text-gray-400 text-sm leading-relaxed">Signals are piped directly from TradingView to our VPS via Webhooks, arriving in your private Discord instantly.</p>
+                            </div>
+                          </li>
+                          <li className="flex gap-4 group">
+                            <div className="mt-1 w-8 h-8 rounded-lg bg-[#0a0a0a] border border-gray-800 flex items-center justify-center shrink-0 group-hover:border-red-500/50 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.1)] transition-all">
+                              <Shield size={14} className="text-white group-hover:text-red-400 transition-colors" />
+                            </div>
+                            <div>
+                              <h4 className="text-white font-semibold mb-1">AI-Filtered Quality</h4>
+                              <p className="text-gray-400 text-sm leading-relaxed">We employ LLMs to double-check market conditions, rejecting sub-optimal trades before they reach you.</p>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </FadeInSection>
+                    <FadeInSection delay={200}>
+                      <TypewriterTerminal />
+                    </FadeInSection>
+                  </div>
+                </div>
+              </section>
+
+              {/* 6. Endless Scrolling Take Profits */}
+              <section id="proof" className="py-24 border-t border-gray-900/50 bg-[#010101] overflow-hidden relative">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[300px] bg-green-500/5 blur-[100px] pointer-events-none"></div>
+
+                <div className="max-w-6xl mx-auto px-6 mb-12 relative z-10">
+                  <FadeInSection>
+                    <h2 className="text-3xl font-bold text-white tracking-tight">Proof of Edge.</h2>
+                    <p className="text-gray-400 mt-2">Real results from the Capital Nerds network.</p>
+                  </FadeInSection>
+                </div>
+
+                <div className="relative w-full flex overflow-x-hidden group">
+                  <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#010101] to-transparent z-10 pointer-events-none"></div>
+                  <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#010101] to-transparent z-10 pointer-events-none"></div>
+
+                  <div className="flex animate-scroll-left gap-6 px-6">
+                    {proofItems.map((imgSrc, index) => (
+                      <div key={index} className="w-[250px] shrink-0 aspect-[9/16] rounded-2xl border border-gray-800 bg-[#050505] flex flex-col items-center justify-center relative overflow-hidden hover:border-green-500/50 transition-all cursor-pointer shadow-xl group/card">
+                        <img src={imgSrc} alt="Proof" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover/card:opacity-100 transition-all duration-500 group-hover/card:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#010101] via-[#010101]/20 to-transparent opacity-90 group-hover/card:opacity-40 transition-opacity duration-300"></div>
+                        
+                        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-10 pointer-events-none">
+                          <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-[10px] sm:text-xs px-3 py-1.5 rounded-full backdrop-blur-md font-mono font-bold flex items-center gap-1.5 shadow-[0_0_10px_rgba(34,197,94,0.2)]">
+                            <CheckCircle2 size={12} /> VERIFIED WIN
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* 7. Pricing Section */}
+              <section id="pricing" className="py-32 px-6 border-t border-gray-900/50 bg-[#010101] relative overflow-hidden">
+                <CometBackground />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-[#010101]/90 to-[#010101] -z-10 blur-[120px] pointer-events-none"></div>
+
+                <div className="max-w-6xl mx-auto">
+                  <FadeInSection>
+                    <div className="text-center mb-16 relative z-10">
+                      <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                        Access the <TextRotator words={["Engine.", "Future.", "Unfair Edge."]} colorClass="text-green-400" />
+                      </h2>
+                      <p className="text-gray-400 max-w-xl mx-auto">
+                        Direct <TextRotator words={["access", "link", "portal"]} /> to our algorithmic engine via private Discord. No hidden fees. Instant automated invite upon payment.
+                      </p>
+                    </div>
+                  </FadeInSection>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-center relative z-10">
+                    {/* 6 Months */}
+                    <FadeInSection delay={0}>
+                      <div className="p-8 rounded-3xl border border-gray-800/80 bg-[#050505]/80 backdrop-blur-sm flex flex-col h-full hover:border-gray-600 hover:-translate-y-1 transition-all duration-300">
+                        <h3 className="text-lg font-medium text-gray-400 mb-2">6 Months</h3>
+                        <div className="mb-6 flex items-baseline">
+                          <span className="text-xl font-bold text-white mr-1 opacity-80">Rp</span>
+                          <span className="text-4xl font-bold text-white">{CONFIG.pricing.sixMonths}</span>
+                        </div>
+                        <ul className="space-y-4 mb-8 flex-grow">
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-600" /> Full Discord Access
+                          </li>
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-600" /> Real-time Signals
+                          </li>
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-600" /> Friday Auditor Reports
+                          </li>
+                        </ul>
+                        <button onClick={() => alert("Redirecting to Midtrans...")} className="w-full py-3 rounded-lg border border-gray-700 text-white font-medium hover:bg-white hover:text-black transition-colors duration-300">
+                          Select Plan
+                        </button>
+                      </div>
+                    </FadeInSection>
+
+                    {/* 1 Year */}
+                    <FadeInSection delay={150}>
+                      <div className="p-8 rounded-3xl border border-gray-400 bg-gradient-to-b from-[#111] to-[#030303] shadow-[0_0_40px_rgba(255,255,255,0.08)] flex flex-col h-full relative transform md:-translate-y-4 hover:shadow-[0_0_60px_rgba(255,255,255,0.15)] hover:-translate-y-6 transition-all duration-300">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-white text-black text-xs font-bold rounded-full shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                          BEST VALUE
+                        </div>
+                        <h3 className="text-lg font-medium text-white mb-2">1 Year</h3>
+                        <div className="mb-1">
+                          <span className="text-sm text-gray-400 line-through">Rp 2.000.000</span>
+                        </div>
+                        <div className="mb-6 flex items-baseline">
+                          <span className="text-xl font-bold text-white mr-1 drop-shadow-md">Rp</span>
+                          <span className="text-4xl font-bold text-white drop-shadow-md">{CONFIG.pricing.oneYear}</span>
+                        </div>
+                        <ul className="space-y-4 mb-8 flex-grow">
+                          <li className="flex items-center gap-3 text-sm text-white">
+                            <ChevronRight size={16} className="text-green-400" /> <span className="font-medium">All 6-Months Features</span>
+                          </li>
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-500" /> Quant Strategy Breakdowns
+                          </li>
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-500" /> Priority Support
+                          </li>
+                        </ul>
+                        <button onClick={() => alert("Redirecting to Midtrans...")} className="w-full py-3 rounded-lg bg-white text-black font-semibold hover:bg-gray-300 active:scale-[0.98] transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                          Get 1 Year Access
+                        </button>
+                      </div>
+                    </FadeInSection>
+
+                    {/* Lifetime */}
+                    <FadeInSection delay={300}>
+                      <div className="p-8 rounded-3xl border border-gray-800/80 bg-[#050505]/80 backdrop-blur-sm flex flex-col h-full hover:border-gray-600 hover:-translate-y-1 transition-all duration-300">
+                        <h3 className="text-lg font-medium text-gray-400 mb-2">Lifetime</h3>
+                        <div className="mb-1">
+                          <span className="text-sm text-gray-500 line-through">Rp {CONFIG.pricing.lifetimeOriginal}</span>
+                        </div>
+                        <div className="mb-6 flex items-baseline">
+                          <span className="text-xl font-bold text-white mr-1 opacity-80">Rp</span>
+                          <span className="text-4xl font-bold text-white">{CONFIG.pricing.lifetime}</span>
+                        </div>
+                        <ul className="space-y-4 mb-8 flex-grow">
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-600" /> Pay once, forever access
+                          </li>
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-600" /> Future Web-App Access
+                          </li>
+                          <li className="flex items-center gap-3 text-sm text-gray-300">
+                            <ChevronRight size={16} className="text-gray-600" /> Direct Admin Contact
+                          </li>
+                        </ul>
+                        <button onClick={() => alert("Redirecting to Midtrans...")} className="w-full py-3 rounded-lg border border-gray-700 text-white font-medium hover:bg-white hover:text-black transition-colors duration-300 flex items-center justify-center gap-2">
+                          <Lock size={14} /> Unlock Lifetime
+                        </button>
+                      </div>
+                    </FadeInSection>
+
+                  </div>
+                  <FadeInSection delay={450}>
+                    <div className="mt-12 text-center relative z-10">
+                      <p className="text-xs text-gray-600 flex items-center justify-center gap-2">
+                        <Shield size={12} /> Secure payments processed via Midtrans Infrastructure.
+                      </p>
+                    </div>
+                  </FadeInSection>
+                </div>
+              </section>
+
+              {/* 8. Terms and Conditions */}
+              <section className="py-12 px-6 border-t border-gray-900/50 bg-[#010101] relative z-10">
+                <div className="max-w-6xl mx-auto">
+                  <div className="max-w-3xl">
+                    <h3 className="text-gray-400 font-bold mb-4 text-sm">
+                      Terms and Conditions
+                    </h3>
+                    <div className={`relative transition-all duration-500 ${showTerms ? '' : 'max-h-32 overflow-hidden'}`}>
+                      <div className="space-y-3 text-xs text-gray-500 leading-relaxed text-justify">
+                        {CONFIG.termsAndConditions.map((para, i) => (
+                          <p key={i} className={para.match(/^\d\./) ? "font-semibold text-gray-400 mt-5 mb-1" : ""}>
+                            {para}
+                          </p>
+                        ))}
+                      </div>
+                      {!showTerms && (
+                        <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#010101] to-transparent pointer-events-none"></div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowTerms(!showTerms)}
+                      className="mt-4 text-xs font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      {showTerms ? 'Show Less' : 'See More'} 
+                      <ChevronRight size={12} className={`transform transition-transform duration-300 ${showTerms ? '-rotate-90' : 'rotate-90'}`} />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Footer */}
+              <footer className="py-12 border-t border-gray-900 px-6 bg-[#010101]">
+                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-black font-bold text-sm leading-none">
+                      &Sigma;
+                    </div>
+                    <span className="font-medium text-gray-400 text-sm">Capital Nerds &copy; 2026</span>
+                  </div>
+                  <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6 text-sm text-gray-500">
+                    <span>Support: <a href={`https://t.me/${CONFIG.support.telegram.replace('@','')}`} target="_blank" rel="noreferrer" className="text-gray-300 hover:text-white transition-colors">{CONFIG.support.telegram}</a></span>
+                    <span>Discord: {CONFIG.support.discord}</span>
+                    <span>WA/Phone: <a href={`https://wa.me/${CONFIG.support.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-gray-300 hover:text-white transition-colors">{CONFIG.support.phone}</a></span>
+                  </div>
+                </div>
+              </footer>
+            </div>
+          );
+        }
+
+        // INIT REACT APP
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
